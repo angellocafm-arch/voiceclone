@@ -165,6 +165,29 @@ DATOS (~/.voiceclone/ — todo local)
 
 ---
 
+## Decisión pendiente — Base de datos
+
+**Contexto (modelo Peter Steinberger / OpenClaw):**
+- OpenClaw usa **SQLite** por defecto para embeddings y búsqueda semántica de memoria
+- Para despliegues avanzados: **PostgreSQL + pgvector**
+- Alternativa local moderna: **LanceDB** (sin daemon, archivos `.lance`)
+
+**Estado actual de VoiceClone:**
+- Memoria y RAG: archivos JSON + FAISS (funciona, pero menos robusto)
+- Para MVP: suficiente
+- Para escalar/comunidad: migrar a SQLite como Peter
+
+**Decisión a tomar con Ángel:**
+- ¿Añadimos SQLite ahora (más robusto, sigue siendo local) o dejamos JSON para MVP?
+- Recomendación: SQLite para la memoria y embeddings, igual que OpenClaw
+
+**Sobre código abierto vs gratuito:**
+- **Código abierto (MIT):** cualquiera puede ver, modificar, contribuir → ✅ ya lo tenemos
+- **Gratuito para usuarios:** no pagan para descargarlo ni usarlo → ✅ por diseño
+- **Ambas cosas a la vez:** como OpenClaw → ✅ ese es el modelo
+
+---
+
 ## Próxima sesión de trabajo — por dónde empezar
 
 **Tarea inmediata más importante:**
