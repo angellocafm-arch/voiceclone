@@ -1,233 +1,191 @@
-# VoiceClone — Preserva tu voz. Para siempre.
+# 🎤 VoiceClone — Tu voz, para siempre
 
-> Open source voice cloning + personality AI for people with ALS and speech disabilities
+**Un asistente de vida completo para personas con ELA y dificultades motoras.**
 
----
+VoiceClone clona tu voz con solo 5 segundos de audio y la convierte en tu herramienta para seguir comunicándote, controlando tu ordenador, leyendo documentos y enviando mensajes — todo con tu propia voz.
 
-## 🎯 What is VoiceClone?
-
-VoiceClone is a **three-layer open source platform** that lets anyone preserve and use their voice, with a special focus on people with **ALS, ELA, and similar conditions that take away your voice**.
-
-### The Problem
-- **ElevenLabs costs €330/month** — out of reach for most patients
-- **There's no tool designed for people losing their voice** — no accessibility, no AAC integration
-- **Your voice data shouldn't go to cloud servers** — privacy is critical
-- **Existing AAC software uses robotic voices** — not YOUR voice
-
-### The Solution
-**3 Integrated Layers:**
-
-| Layer | What it does | Status |
-|-------|-------------|--------|
-| 🎤 **Voice Cloning Engine** | Clone your voice locally in 2-3 minutes | ✅ MVP Ready |
-| 🌐 **Accessible Web App** | Eye tracking + AAC integration (WCAG AA) | ✅ MVP Ready |
-| 🧠 **Personality AI** | Your voice speaks like YOU, not a robot | ✅ MVP Ready |
+100% gratis. 100% privado. 100% local. Sin internet, sin nube, sin suscripción.
 
 ---
 
-## ✨ Key Features
+## ¿Qué hace VoiceClone?
 
-- ✅ **One command install** — Download, install, done (no terminal needed)
-- ✅ **Zero-shot voice cloning** — A few minutes of audio = your voice forever
-- ✅ **100% local processing** — Nothing leaves your computer. Ever.
-- ✅ **Accessible by design** — Eye tracking (Tobii), switch control, keyboard navigation
-- ✅ **Personality preservation** — Your voice + your way of speaking + your expressions
-- ✅ **AAC integration** — Use with Grid 3, Proloquo2Go, Snap Core First
-- ✅ **Multi-engine** — Chatterbox TTS (primary) + XTTS v2 (fallback)
-- ✅ **Open source MIT** — Forever free, no paywalls, no subscriptions
+### 💬 Comunicación
+Selecciona frases rápidas o escribe texto libre. VoiceClone lo dice en voz alta con **tu voz clonada**.
+
+- Tablero de frases frecuentes (seleccionables con la mirada)
+- Teclado virtual adaptado
+- Predicción inteligente de frases basada en tu historial
+- Tu voz suena exactamente como tú
+
+### 🖥️ Control del Ordenador
+Dale instrucciones en lenguaje natural y VoiceClone ejecuta:
+
+- *"Crea una carpeta llamada Médicos 2026"*
+- *"Abre el navegador en Google"*
+- *"Lee mi último email"*
+- *"Busca el archivo de la receta"*
+
+Todo con confirmación por seguridad. Nada se ejecuta sin tu permiso.
+
+### 📝 Productividad
+- Dicta documentos con tu voz
+- Arrastra un PDF o TXT y VoiceClone lo lee en voz alta
+- Agenda y recordatorios
+- Resúmenes automáticos de documentos
+
+### 📱 Mensajería
+Envía y recibe mensajes por tus canales habituales:
+
+- **Telegram** — Completamente funcional
+- **WhatsApp** — En desarrollo
+- **Signal** — En desarrollo
+
+Los mensajes entrantes se leen con tu voz. Respondes desde la interfaz.
 
 ---
 
-## 🚀 Quick Start
+## Instalación
 
-### Install (macOS)
+### macOS (Apple Silicon o Intel)
 ```bash
-curl -fsSL https://voiceclone.dev/install | bash
+curl -fsSL https://raw.githubusercontent.com/angellocafm-arch/voiceclone/main/scripts/install.sh | bash
 ```
 
-### Install (Windows / Linux)
+### Linux (Ubuntu/Debian/Fedora)
 ```bash
-# Coming soon — installer builds in progress
+curl -fsSL https://raw.githubusercontent.com/angellocafm-arch/voiceclone/main/scripts/install.sh | bash
 ```
 
-### After Installation
-1. Open VoiceClone (the web app opens automatically)
-2. Click **"Clone My Voice"**
-3. Record 2-3 minutes reading the guided texts
-4. *(Optional)* Answer personality questions — so your voice speaks like YOU
-5. Done! Test your cloned voice from the dashboard
+### Lo que hace el instalador:
+1. Detecta tu hardware (RAM, CPU, GPU)
+2. Descarga el modelo de IA más potente que tu ordenador pueda correr
+3. Instala el motor de voz
+4. Abre Chrome en `http://localhost:8765`
+5. Te guía por el proceso de clonar tu voz — sin formularios, solo hablando
 
-### For Developers
+### Requisitos mínimos
+- **4 GB de RAM** (recomendado 8 GB o más)
+- **macOS 12+** o **Linux** (Ubuntu 20.04+, Debian 11+, Fedora 36+)
+- **2 GB de espacio en disco** (modelos incluidos)
+
+---
+
+## Los 4 Módulos
+
+| Módulo | Qué hace | Cómo se usa |
+|--------|----------|-------------|
+| 💬 Comunicación | Habla con tu voz clonada | Selecciona frases o escribe texto |
+| 🖥️ Control | Controla el ordenador | Dale instrucciones naturales |
+| 📝 Productividad | Dicta, lee, organiza | Arrastra archivos, dicta texto |
+| 📱 Mensajería | Telegram, WhatsApp, Signal | Lee y responde mensajes |
+
+---
+
+## Accesibilidad
+
+VoiceClone está diseñado para personas con movilidad reducida:
+
+- **Eye tracking:** Controla todo con la mirada (compatible con Tobii y otros)
+- **Selección por fijación:** Mira un botón 800ms para activarlo (configurable)
+- **Targets grandes:** Todos los botones miden al menos 64px
+- **Alto contraste:** Tema oscuro optimizado, soporte para alto contraste
+- **Teclado:** Navegación completa con Tab + Enter
+- **Atajos:** ⌘1-4 para cambiar entre módulos
+- **Screen readers:** Compatible con VoiceOver y NVDA
+
+---
+
+## Tecnología
+
+| Componente | Tecnología | Licencia |
+|------------|------------|----------|
+| Voz | [Chatterbox TTS](https://github.com/resemble-ai/chatterbox) + XTTS v2 | MIT / LGPL |
+| IA | [Ollama](https://ollama.ai) + Llama/Mistral | MIT |
+| Frontend | Next.js 16 + React 19 + Tailwind | MIT |
+| Backend | FastAPI + Python 3.10+ | MIT |
+| Canales | Arquitectura inspirada en [OpenClaw](https://github.com/openclaw/openclaw) | MIT |
+
+### Modelos según hardware
+
+| RAM disponible | Modelo seleccionado |
+|----------------|---------------------|
+| 4 GB | Llama 3.2 3B |
+| 8 GB | Mistral 7B |
+| 16 GB | Llama 3.1 13B |
+| 32 GB | Llama 3.1 32B |
+| 64 GB+ GPU | Llama 3.1 70B |
+
+El instalador detecta tu hardware automáticamente y descarga el modelo óptimo.
+
+---
+
+## Privacidad
+
+- **Sin internet:** Funciona completamente offline después de la instalación
+- **Sin nube:** Tu voz nunca sale de tu ordenador
+- **Sin cuenta:** No necesitas registrarte en nada
+- **Sin telemetría:** No enviamos datos de uso
+- **Código abierto:** Puedes verificar exactamente qué hace
+
+---
+
+## Para desarrolladores
+
+### Estructura del proyecto
+
+```
+src/
+├── api/          # FastAPI server (puerto 8765)
+├── llm/          # Ollama client, onboarding agent, predictor
+├── system/       # Control del SO (archivos, browser, apps, email)
+├── channels/     # Canales de mensajería (Telegram, WhatsApp)
+├── rag/          # Ingesta y búsqueda vectorial
+├── voice_engine/ # Motor de voz (Chatterbox + XTTS)
+├── landing/      # Página de descarga (detección hardware)
+└── web/          # Frontend Next.js (app principal)
+    └── src/
+        ├── app/          # Next.js app router
+        ├── components/
+        │   ├── AppShell.tsx        # Layout con sidebar
+        │   ├── GazeTracker.tsx     # Eye tracking
+        │   ├── OnboardingScreen.tsx # Setup conversacional
+        │   └── modules/
+        │       ├── CommunicationModule.tsx
+        │       ├── ControlModule.tsx
+        │       ├── ProductivityModule.tsx
+        │       └── ChannelsModule.tsx
+        └── lib/          # API client, utils
+```
+
+### Ejecutar en desarrollo
+
 ```bash
-# Clone the repo
-git clone https://github.com/angellocafm-arch/voiceclone.git
-cd voiceclone
+# Backend
+cd src && python -m api.main
 
-# Install Python dependencies
-pip install -e .
-
-# Start the API server
-voiceclone server
-
-# Start the web app (separate terminal)
+# Frontend
 cd src/web && npm install && npm run dev
+
+# Ollama (en otra terminal)
+ollama serve
 ```
 
 ---
 
-## 📐 Architecture
+## Licencia
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    WEB APP (Next.js)                 │
-│  Landing → Install → Clone → Personality → Dashboard │
-│  WCAG AA · Eye tracking · 64px targets              │
-└───────────────────────┬─────────────────────────────┘
-                        │ HTTP (localhost:8765)
-┌───────────────────────┴─────────────────────────────┐
-│                  API SERVER (FastAPI)                 │
-│  POST /clone · POST /speak · GET /voices · GET /health│
-│  POST /personality/setup · POST /personality/speak    │
-└───────────────────────┬─────────────────────────────┘
-                        │
-┌───────────────────────┴─────────────────────────────┐
-│              VOICE ENGINE (Python)                    │
-│  ┌──────────────┐  ┌───────────┐  ┌──────────────┐  │
-│  │ Chatterbox   │→ │ XTTS v2   │  │ Personality  │  │
-│  │ TTS (primary)│  │ (fallback) │  │ AI (LLM)    │  │
-│  └──────────────┘  └───────────┘  └──────────────┘  │
-│  Engine Adapter Pattern — hot-swappable models       │
-└──────────────────────────────────────────────────────┘
-```
+MIT — Úsalo, modifícalo, compártelo. Es tuyo.
 
 ---
 
-## 📋 Stack
+## Créditos
 
-| Component | Technology | License | Lines |
-|-----------|------------|---------|-------|
-| **Voice Engine** | Chatterbox TTS + XTTS v2 | MIT / MPL 2.0 | 2,800+ |
-| **API Server** | FastAPI (Python) | MIT | 500+ |
-| **Personality AI** | Claude API / Ollama / Identity LLM | MIT | 1,200+ |
-| **Web App** | Next.js 16 + Tailwind | MIT | 2,100+ |
-| **CLI** | Click + Rich (Python) | MIT | 400+ |
-| **Tests** | pytest | MIT | 1,500+ |
+Proyecto de [Vertex Developer](https://vertexdeveloper.com) — Ángel Fernández & Enrique Alonso.
 
-**Total: 11,000+ lines of code · 118 tests · 26 documents**
+Inspirado por la comunidad de personas con ELA y sus familias. 
+Construido con cariño y con la convicción de que la tecnología debe servir a todos.
 
 ---
 
-## 🎯 For People with ELA/ALS
-
-If you or someone you love is facing voice loss:
-
-1. **Clone your voice BEFORE you lose it** — preservation is time-sensitive
-2. **Use with your AAC software** — Grid 3, Proloquo2Go, Snap Core First
-3. **Capture your personality too** — not just how you sound, but how you SPEAK
-4. **Complete privacy** — your voice data never leaves your computer
-5. **Zero cost** — open source, MIT license, forever free
-
-### Accessibility Features
-- 🖱️ **Keyboard:** Full navigation with Tab, Enter, Escape
-- 👁️ **Eye tracking:** All buttons ≥64px, dwell-click compatible (Tobii)
-- 🔘 **Switch access:** 1-2 button navigation for the entire app
-- 🔊 **Screen reader:** Full ARIA labels, live regions, progress announcements
-- 🌗 **High contrast:** Dark theme optimized for reduced eye strain
-- ⚡ **Reduced motion:** Respects `prefers-reduced-motion`
-
----
-
-## 📚 Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Vision](vision/vision.md) | Complete product vision — 3 layers, 4 user profiles |
-| [Architecture](docs/arquitectura-completa.md) | System design, API contracts, data flows |
-| [Accessibility](docs/diseno-accesibilidad.md) | WCAG AA, eye tracking, switch access spec |
-| [Installation Flow](docs/flujo-instalacion.md) | How to install without using terminal |
-| [Personality AI](docs/capa3-personalidad-ia.md) | How the personality system works |
-| [Web App Mockups](mockups/web-app-mockups.md) | All 6 screens with ASCII wireframes |
-| [Brief](brief.md) | Complete product brief v2.0 |
-| [QA Report](qa-screenshots/QA-REPORT.md) | Full browser testing results |
-
----
-
-## 🏗️ Project Structure
-
-```
-voiceclone/
-├── src/
-│   ├── voice_engine/        # Capa 1: Voice cloning engine
-│   │   ├── base.py          # Abstract base class (VoiceEngine)
-│   │   ├── chatterbox_engine.py  # Chatterbox TTS implementation
-│   │   ├── xtts_engine.py   # XTTS v2 fallback
-│   │   ├── manager.py       # Engine adapter + auto-fallback
-│   │   └── audio_utils.py   # Audio validation, conversion, quality
-│   ├── personality/          # Capa 3: Personality AI
-│   │   ├── profile.py       # PersonalityProfile (17 fields)
-│   │   ├── questionnaire.py # 12 guided questions + text analysis
-│   │   ├── llm.py           # Claude / Ollama / Identity backends
-│   │   └── engine.py        # Orchestrator (text → LLM → styled text → TTS)
-│   ├── api/                  # FastAPI server (port 8765)
-│   │   └── server.py        # All endpoints + lifespan + CORS
-│   ├── web/                  # Next.js 16 web app (Capa 2)
-│   │   └── src/
-│   │       ├── app/          # App router (page.tsx, layout.tsx)
-│   │       ├── components/   # 6 screen components
-│   │       └── lib/          # API client, utilities
-│   └── cli.py               # Click CLI (clone, speak, voices, server)
-├── tests/                    # 118 tests
-├── docs/                     # Technical documentation
-├── mockups/                  # UI wireframes and specs
-├── vision/                   # Product vision docs
-├── qa-screenshots/           # Browser testing evidence
-└── brief.md                  # Product brief v2.0
-```
-
----
-
-## 🔮 Roadmap
-
-- [x] Phase 1: Genesis + Product Vision
-- [x] Phase 2: Team + Design Review + Mockups
-- [x] Phase 3: MVP Development (11,000+ lines)
-- [ ] Phase 4: GitHub + Releases ← **Current**
-- [ ] Phase 5: Community + Contributions
-- [ ] Phase 6: AAC Integrations (Grid 3, Tobii SDK)
-- [ ] Phase 7: Multi-language support
-
----
-
-## 📜 License
-
-**MIT License** — Completely open, forever free.
-
-```
-Copyright 2026 Vertex Developer (Ángel Fernández)
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
-```
-
----
-
-## 💚 Purpose
-
-**160,000+ people worldwide have ALS right now.** Thousands lose their voice every year.
-
-VoiceClone exists because your voice is part of who you are. It's how your children recognize you. It's how you laugh, whisper, and say "I love you."
-
-This tool is free because no one should have to pay €330/month to keep their own voice.
-
-*Tu voz. Para siempre.*
-
----
-
-**By [Vertex Developer](https://github.com/angellocafm-arch)** · Made with ❤️ for the ALS community
+*Tu voz es tuya. Para siempre.*
