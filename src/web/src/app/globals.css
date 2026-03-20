@@ -1,0 +1,406 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   VoiceClone — Global Styles
+   Design tokens from mockups + accessibility spec
+   WCAG 2.2 AA · Eye tracking compatible · 64px+ targets
+   ═══════════════════════════════════════════════════════════ */
+
+/* Custom design tokens as CSS variables */
+:root {
+  /* Colors — dark theme optimized for ELA users */
+  --vc-bg-primary: #0A0A0A;
+  --vc-bg-secondary: #141414;
+  --vc-bg-card: #1A1A1A;
+  --vc-bg-input: #222222;
+  
+  --vc-text-primary: #F5F5F5;
+  --vc-text-secondary: #B0B0B0;
+  --vc-text-muted: #808080;
+  
+  --vc-accent-blue: #1E3A5F;
+  --vc-accent-blue-hover: #2A4F7F;
+  --vc-accent-green: #2ECC71;
+  --vc-accent-green-hover: #3BE880;
+  --vc-accent-orange: #F39C12;
+  --vc-accent-red: #E74C3C;
+  
+  --vc-focus: #FFD700;
+  --vc-border: #333333;
+  
+  /* Typography */
+  --vc-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Spacing for eye tracking targets */
+  --vc-target-min: 64px;
+  --vc-target-gap: 16px;
+  
+  /* Animation — reduced by default */
+  --vc-transition: 150ms ease-in-out;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --vc-transition: 0ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --vc-bg-primary: #000000;
+    --vc-bg-secondary: #0A0A0A;
+    --vc-bg-card: #111111;
+    --vc-text-primary: #FFFFFF;
+    --vc-text-secondary: #E0E0E0;
+    --vc-border: #FFFFFF;
+    --vc-focus: #FFFF00;
+  }
+}
+
+/* Base styles */
+html {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--vc-font-sans);
+  background-color: var(--vc-bg-primary);
+  color: var(--vc-text-primary);
+  line-height: 1.6;
+  font-size: 18px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Focus styles — CRITICAL for accessibility
+   Golden ring, 3px, always visible on keyboard nav
+   ═══════════════════════════════════════════════════════════ */
+
+*:focus-visible {
+  outline: 3px solid var(--vc-focus);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Skip link — for keyboard/screen reader navigation
+   ═══════════════════════════════════════════════════════════ */
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--vc-focus);
+  color: #000;
+  padding: 12px 24px;
+  font-weight: 700;
+  font-size: 18px;
+  border-radius: 0 0 12px 12px;
+  z-index: 9999;
+  transition: top var(--vc-transition);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Button components — 64px+ targets, eye tracking friendly
+   ═══════════════════════════════════════════════════════════ */
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--vc-target-min);
+  padding: 16px 32px;
+  background: var(--vc-accent-blue);
+  color: var(--vc-text-primary);
+  border: 2px solid transparent;
+  border-radius: 16px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--vc-transition), transform var(--vc-transition);
+  width: 100%;
+  text-align: center;
+  gap: 12px;
+}
+
+.btn-primary:hover {
+  background: var(--vc-accent-blue-hover);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--vc-target-min);
+  padding: 16px 32px;
+  background: var(--vc-bg-card);
+  color: var(--vc-text-primary);
+  border: 2px solid var(--vc-border);
+  border-radius: 16px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--vc-transition), border-color var(--vc-transition);
+  width: 100%;
+  text-align: center;
+  gap: 12px;
+}
+
+.btn-secondary:hover {
+  background: var(--vc-bg-input);
+  border-color: var(--vc-text-secondary);
+}
+
+.btn-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--vc-target-min);
+  padding: 16px 32px;
+  background: #1a5c35;
+  color: var(--vc-text-primary);
+  border: 2px solid var(--vc-accent-green);
+  border-radius: 16px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--vc-transition);
+  width: 100%;
+  gap: 12px;
+}
+
+.btn-success:hover {
+  background: #1f7040;
+}
+
+.btn-danger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--vc-text-secondary);
+  border: 2px solid var(--vc-border);
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--vc-transition), color var(--vc-transition);
+  width: 100%;
+  gap: 8px;
+}
+
+.btn-danger:hover {
+  background: rgba(231, 76, 60, 0.15);
+  color: var(--vc-accent-red);
+  border-color: var(--vc-accent-red);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Card component — for large clickable areas
+   ═══════════════════════════════════════════════════════════ */
+
+.card-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: var(--vc-target-min);
+  padding: 20px 28px;
+  background: var(--vc-bg-card);
+  border: 2px solid var(--vc-border);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background var(--vc-transition), border-color var(--vc-transition);
+  width: 100%;
+  gap: 8px;
+}
+
+.card-option:hover {
+  background: var(--vc-bg-input);
+  border-color: var(--vc-accent-blue);
+}
+
+.card-option-title {
+  font-size: 22px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-option-desc {
+  font-size: 16px;
+  color: var(--vc-text-secondary);
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Progress bar
+   ═══════════════════════════════════════════════════════════ */
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: var(--vc-bg-input);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--vc-accent-blue);
+  border-radius: 6px;
+  transition: width 300ms ease-in-out;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Wizard layout — centered, max-width, no scroll needed
+   ═══════════════════════════════════════════════════════════ */
+
+.wizard-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.wizard-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.wizard-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.wizard-subtitle {
+  font-size: 18px;
+  color: var(--vc-text-secondary);
+}
+
+.wizard-step {
+  font-size: 16px;
+  color: var(--vc-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Status indicator (API status dot)
+   ═══════════════════════════════════════════════════════════ */
+
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-dot-active {
+  background: var(--vc-accent-green);
+}
+
+.status-dot-inactive {
+  background: var(--vc-accent-red);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Audio player — accessible
+   ═══════════════════════════════════════════════════════════ */
+
+.audio-preview {
+  background: var(--vc-bg-card);
+  border: 2px solid var(--vc-border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.audio-text {
+  font-size: 18px;
+  color: var(--vc-text-secondary);
+  font-style: italic;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Tip box — emotional/helpful messages
+   ═══════════════════════════════════════════════════════════ */
+
+.tip-box {
+  background: rgba(243, 156, 18, 0.08);
+  border: 1px solid rgba(243, 156, 18, 0.25);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 16px;
+  color: var(--vc-text-secondary);
+  line-height: 1.5;
+}
+
+.tip-box strong {
+  color: var(--vc-accent-orange);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Privacy message
+   ═══════════════════════════════════════════════════════════ */
+
+.privacy-msg {
+  text-align: center;
+  font-size: 15px;
+  color: var(--vc-text-muted);
+  line-height: 1.6;
+  margin-top: 24px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Responsive breakpoints
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+  
+  .wizard-container {
+    padding: 20px 16px;
+  }
+  
+  .wizard-title {
+    font-size: 24px;
+  }
+  
+  .btn-primary, .btn-secondary, .btn-success {
+    font-size: 18px;
+    padding: 14px 24px;
+  }
+  
+  .card-option-title {
+    font-size: 20px;
+  }
+}

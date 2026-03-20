@@ -351,12 +351,38 @@ class TestPersonality:
         })
         assert response.status_code == 200
 
-    def test_personality_setup_not_implemented(self, client):
+    def test_personality_setup_missing_required(self, client):
+        """Setup with empty questionnaire returns 400 (missing required answers)"""
         response = client.post("/personality/setup", json={
             "voice_id": "maria",
             "questionnaire": {},
         })
-        assert response.status_code == 501
+        assert response.status_code == 400
+        assert "Missing required" in response.json()["detail"]
+
+    def test_personality_setup_voice_not_found(self, client, mock_manager):
+        """Setup with non-existent voice returns 404"""
+        mock_manager.get_voice.return_value = None
+        response = client.post("/personality/setup", json={
+            "voice_id": "nonexistent",
+            "questionnaire": {
+                "description": "Test",
+                "formality": "Casual",
+                "warmth": "Cálido/a — me gusta conectar",
+                "energy": "Normal — ni muy arriba ni muy abajo",
+            },
+        })
+        assert response.status_code == 404
+
+    def test_personality_questions(self, client):
+        """Get personality questionnaire questions"""
+        response = client.get("/personality/questions")
+        assert response.status_code == 200
+        questions = response.json()
+        assert len(questions) >= 10
+        ids = [q["id"] for q in questions]
+        assert "description" in ids
+        assert "formality" in ids
 
 
 # ═══════════════════════════════════════════════════════════════

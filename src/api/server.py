@@ -4,6 +4,7 @@ This server runs on localhost:8765 and provides a REST API for:
 - Voice cloning from audio files
 - Speech synthesis with cloned voices
 - Voice management (list, get, delete)
+- Personality capture and styled speech (Layer 3)
 - Health checks
 
 Security: Only binds to localhost. No authentication required.
@@ -31,6 +32,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from voice_engine.base import AudioFormat, VoiceProfile
 from voice_engine.manager import EngineManager
+from personality.engine import PersonalityEngine
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +41,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════════
 
 _manager: Optional[EngineManager] = None
+_personality: Optional[PersonalityEngine] = None
 _start_time: float = 0
 
 
@@ -57,6 +60,16 @@ def get_manager() -> EngineManager:
     return _manager
 
 
+def get_personality() -> PersonalityEngine:
+    """Get the global personality engine"""
+    if _personality is None or not _personality.is_ready:
+        raise HTTPException(
+            status_code=503,
+            detail="Personality engine not initialized.",
+        )
+    return _personality
+
+
 # ═══════════════════════════════════════════════════════════════
 # App lifecycle
 # ═══════════════════════════════════════════════════════════════
@@ -64,27 +77,39 @@ def get_manager() -> EngineManager:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize engine on startup, cleanup on shutdown"""
-    global _manager, _start_time
+    global _manager, _personality, _start_time
     
     _start_time = time.time()
     logger.info("🎤 VoiceClone API starting...")
     
+    # Initialize voice engine (Layer 1)
     _manager = EngineManager()
     success = _manager.initialize()
     
     if success:
         voices = _manager.list_voices()
         logger.info(
-            f"✅ VoiceClone API ready — "
+            f"✅ Voice engine ready — "
             f"Engine: {_manager.engine_name}, "
             f"Voices: {len(voices)}"
         )
     else:
         logger.error("❌ No voice engine could be loaded!")
     
+    # Initialize personality engine (Layer 3)
+    _personality = PersonalityEngine(
+        personality_dir=_manager.voiceclone_dir / "personality" if _manager else None,
+    )
+    if _personality.initialize():
+        logger.info("✅ Personality engine ready")
+    else:
+        logger.warning("⚠️  Personality engine failed to initialize (non-critical)")
+    
     yield
     
     # Shutdown
+    if _personality:
+        _personality.shutdown()
     if _manager:
         _manager.shutdown()
     logger.info("VoiceClone API shut down")
@@ -163,6 +188,8 @@ class HealthResponse(BaseModel):
     engine: Optional[str]
     model_loaded: bool
     voices_count: int
+    personality_engine: Optional[str]
+    personalities_count: int
     uptime_seconds: int
     version: str
 
@@ -191,16 +218,29 @@ async def health_check():
             engine=None,
             model_loaded=False,
             voices_count=0,
+            personality_engine=None,
+            personalities_count=0,
             uptime_seconds=int(time.time() - _start_time),
             version="0.1.0-dev",
         )
 
     voices = _manager.list_voices()
+    
+    # Personality status
+    personality_status = None
+    personalities_count = 0
+    if _personality and _personality.is_ready:
+        p_status = _personality.get_status()
+        personality_status = p_status.get("llm_backend")
+        personalities_count = p_status.get("profiles_count", 0)
+    
     return HealthResponse(
         status="ok",
         engine=_manager.engine_name,
         model_loaded=True,
         voices_count=len(voices),
+        personality_engine=personality_status,
+        personalities_count=personalities_count,
         uptime_seconds=int(time.time() - _start_time),
         version="0.1.0-dev",
     )
@@ -420,63 +460,501 @@ async def delete_voice(voice_id: str):
 
 
 # ═══════════════════════════════════════════════════════════════
-# Personality endpoints (stub for Task 3.5)
+# Personality endpoints (Layer 3 — full implementation)
 # ═══════════════════════════════════════════════════════════════
 
 class PersonalitySpeakRequest(BaseModel):
     """Request for personality-enhanced speech"""
-    text: str = Field(..., min_length=1, max_length=5000)
+    text: str = Field(..., min_length=1, max_length=5000, description="Text/intention to express")
+    voice_id: str = Field(..., description="Voice name or ID")
+    personality: bool = Field(True, description="Apply personality rewriting (false = regular speak)")
+    format: str = Field("wav", description="Output format: wav, ogg, mp3")
+    exaggeration: float = Field(0.5, ge=0.0, le=1.0, description="Emotion intensity")
+    cfg: float = Field(0.5, ge=0.0, le=1.0, description="Voice adherence strength")
+
+
+class PersonalitySetupRequest(BaseModel):
+    """Request to set up personality for a voice via questionnaire answers"""
+    voice_id: str = Field(..., description="Voice to attach personality to")
+    questionnaire: dict = Field(
+        default_factory=dict,
+        description=(
+            "Questionnaire answers as {question_id: answer}. "
+            "Required: description, formality, warmth, energy. "
+            "Optional: sentence_length, directness, catchphrases, "
+            "vocabulary_level, humor_style, emoji_usage, topics, sample_phrases."
+        ),
+    )
+    examples: list[str] = Field(
+        default_factory=list,
+        description="Optional example texts for pattern analysis",
+    )
+
+
+class PersonalitySetupResponse(BaseModel):
+    """Response after personality setup"""
     voice_id: str
-    personality: bool = True
-    format: str = "wav"
+    personality_configured: bool
+    sample_phrases: list[str]
+    profile_summary: dict
+    message: str
+
+
+class PersonalityValidateRequest(BaseModel):
+    """Request to submit feedback on personality sample phrases"""
+    voice_id: str = Field(..., description="Voice being validated")
+    feedback: list[dict] = Field(
+        ...,
+        description=(
+            "List of {phrase_index: int, is_accurate: bool, comment: str}. "
+            "Mark each sample phrase as accurate or not."
+        ),
+    )
+
+
+class PersonalityValidateResponse(BaseModel):
+    """Response after validation feedback"""
+    voice_id: str
+    updated: bool
+    accuracy_score: float
+    new_sample_phrases: list[str]
+    message: str
+
+
+class PersonalityProfileResponse(BaseModel):
+    """Full personality profile response"""
+    voice_name: str
+    description: str
+    formality: str
+    humor_style: str
+    catchphrases: list[str]
+    topics: list[str]
+    vocabulary_level: str
+    emoji_usage: str
+    sentence_length: str
+    directness: str
+    warmth: str
+    energy: str
+    sample_phrases: list[str]
+    sources: list[str]
+    version: int
+
+
+class QuestionResponse(BaseModel):
+    """A single questionnaire question"""
+    id: str
+    text: str
+    help_text: str
+    category: str
+    input_type: str
+    choices: list[str]
+    required: bool
+
+
+class TextAnalysisRequest(BaseModel):
+    """Request to analyze texts for personality patterns"""
+    voice_id: str
+    texts: list[str] = Field(..., min_length=1, description="List of text messages to analyze")
+    source: str = Field("manual", description="Source identifier (manual, whatsapp, email)")
+
+
+class TextAnalysisResponse(BaseModel):
+    """Text analysis results"""
+    voice_id: str
+    total_messages: int
+    total_words: int
+    avg_sentence_length: float
+    inferred_formality: str
+    emoji_level: str
+    top_words: dict
+    potential_catchphrases: list[str]
+    texts_saved: int
+    profile_enriched: bool
 
 
 @app.post(
     "/personality/speak",
     tags=["personality"],
     responses={
-        200: {"content": {"audio/wav": {}}},
-        501: {"model": ErrorResponse},
+        200: {"content": {"audio/wav": {}, "audio/ogg": {}, "audio/mpeg": {}}},
+        400: {"model": ErrorResponse},
+        404: {"model": ErrorResponse},
     },
 )
 async def personality_speak(request: PersonalitySpeakRequest):
-    """Synthesize speech with personality (Capa 3)
-    
+    """Synthesize speech with personality (Layer 3)
+
     Takes the input text, rewrites it using the voice's personality
     profile via LLM, then synthesizes with the cloned voice.
-    
-    ⚠️  This endpoint will be fully implemented in Task 3.5.
-    Currently falls back to regular /speak without personality.
+
+    Pipeline:
+      Input text → LLM rewrite (personality) → TTS synthesis → Audio
+
+    If personality is disabled or not configured for this voice,
+    falls back to regular synthesis.
+
+    Note: This endpoint is slower than /speak because it includes
+    the LLM rewriting step. Use /speak for raw synthesis.
     """
-    # For now, fall back to regular synthesis
-    speak_request = SpeakRequest(
-        text=request.text,
-        voice_id=request.voice_id,
-        format=request.format,
-    )
-    return await speak(speak_request)
+    manager = get_manager()
+    personality = get_personality()
 
+    # Find voice
+    voice = manager.get_voice(request.voice_id)
+    if voice is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f'Voice "{request.voice_id}" not found. Use GET /voices to list available voices.',
+        )
 
-class PersonalitySetupRequest(BaseModel):
-    """Request to set up personality for a voice"""
-    voice_id: str
-    questionnaire: dict = Field(default_factory=dict)
-    examples: list[str] = Field(default_factory=list)
+    # Apply personality rewriting if enabled
+    styled_text = request.text
+    personality_applied = False
+
+    if request.personality and personality.has_personality(voice.name):
+        try:
+            styled_text = personality.apply_personality(request.text, voice.name)
+            personality_applied = True
+        except Exception as e:
+            logger.warning(f"Personality rewrite failed, using original text: {e}")
+
+    # Map format
+    format_map = {
+        "wav": AudioFormat.WAV,
+        "ogg": AudioFormat.OGG,
+        "mp3": AudioFormat.MP3,
+    }
+    output_format = format_map.get(request.format, AudioFormat.WAV)
+    content_type_map = {
+        "wav": "audio/wav",
+        "ogg": "audio/ogg",
+        "mp3": "audio/mpeg",
+    }
+
+    try:
+        result = manager.synthesize(
+            text=styled_text,
+            voice=voice,
+            output_format=output_format,
+            exaggeration=request.exaggeration,
+            cfg=request.cfg,
+        )
+
+        content_type = content_type_map.get(request.format, "audio/wav")
+
+        return Response(
+            content=result.audio_data,
+            media_type=content_type,
+            headers={
+                "X-Duration-Seconds": f"{result.duration_seconds:.2f}",
+                "X-Voice-Name": result.voice_name,
+                "X-Sample-Rate": str(result.sample_rate),
+                "X-Personality-Applied": str(personality_applied).lower(),
+                "X-Original-Text": request.text[:100],
+                "X-Styled-Text": styled_text[:100],
+            },
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=f"Synthesis failed: {e}")
 
 
 @app.post(
     "/personality/setup",
+    response_model=PersonalitySetupResponse,
     tags=["personality"],
-    responses={501: {"model": ErrorResponse}},
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
 async def personality_setup(request: PersonalitySetupRequest):
     """Set up personality profile for a voice
-    
-    ⚠️  Will be fully implemented in Task 3.5.
+
+    Submit questionnaire answers to create a personality profile.
+    The system will generate sample phrases for validation.
+
+    Required answers: description, formality, warmth, energy.
+    Optional: sentence_length, directness, catchphrases,
+    vocabulary_level, humor_style, emoji_usage, topics, sample_phrases.
+
+    Use GET /personality/questions to see all available questions.
     """
-    raise HTTPException(
-        status_code=501,
-        detail="Personality setup not yet implemented. Coming in next release.",
+    manager = get_manager()
+    personality = get_personality()
+
+    # Verify voice exists
+    voice = manager.get_voice(request.voice_id)
+    if voice is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f'Voice "{request.voice_id}" not found.',
+        )
+
+    # Start questionnaire and submit answers
+    questionnaire = personality.start_questionnaire(voice.name)
+
+    results = questionnaire.submit_all(request.questionnaire)
+    failed = {k: v for k, v in results.items() if not v}
+    if failed:
+        logger.warning(f"Some answers were not accepted: {failed}")
+
+    # Check if minimum required answers are present
+    if not questionnaire.is_complete():
+        missing = questionnaire.get_missing()
+        missing_ids = [q.id for q in missing]
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Missing required answers: {missing_ids}. "
+                "Required: description, formality, warmth, energy."
+            ),
+        )
+
+    # Finalize and create profile
+    profile = personality.finalize_questionnaire(voice.name, questionnaire)
+
+    # Import example texts if provided
+    if request.examples:
+        personality.import_texts(voice.name, request.examples, source="setup")
+
+    # Update voice has_personality flag
+    voice.has_personality = True
+
+    return PersonalitySetupResponse(
+        voice_id=voice.voice_id,
+        personality_configured=True,
+        sample_phrases=profile.sample_phrases[:5],
+        profile_summary={
+            "formality": profile.formality,
+            "warmth": profile.warmth,
+            "energy": profile.energy,
+            "catchphrases_count": len(profile.catchphrases),
+            "topics": profile.topics[:5],
+            "version": profile.version,
+        },
+        message=(
+            f'Personality configured for "{voice.name}". '
+            f'Review the sample phrases — do they sound like you? '
+            f'Use POST /personality/validate to give feedback.'
+        ),
+    )
+
+
+@app.post(
+    "/personality/validate",
+    response_model=PersonalityValidateResponse,
+    tags=["personality"],
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+async def personality_validate(request: PersonalityValidateRequest):
+    """Submit feedback on personality sample phrases
+
+    After setup, review the generated sample phrases and tell us
+    which ones sound like you.
+
+    Send feedback as: [{phrase_index: 0, is_accurate: true/false, comment: "..."}]
+
+    The system will refine the profile based on your feedback
+    and generate new sample phrases.
+    """
+    personality = get_personality()
+
+    # Find voice name from voice_id
+    manager = get_manager()
+    voice = manager.get_voice(request.voice_id)
+    if voice is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f'Voice "{request.voice_id}" not found.',
+        )
+
+    if not personality.has_personality(voice.name):
+        raise HTTPException(
+            status_code=400,
+            detail=f'No personality configured for "{voice.name}". Use POST /personality/setup first.',
+        )
+
+    # Submit feedback
+    updated_profile = personality.submit_feedback(voice.name, request.feedback)
+    if updated_profile is None:
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to update personality profile.",
+        )
+
+    # Generate new sample phrases
+    new_samples = personality.generate_samples(voice.name, count=5)
+
+    # Calculate accuracy
+    accurate = sum(1 for f in request.feedback if f.get("is_accurate", False))
+    total = len(request.feedback)
+    accuracy = accurate / total if total > 0 else 0
+
+    return PersonalityValidateResponse(
+        voice_id=voice.voice_id,
+        updated=True,
+        accuracy_score=accuracy,
+        new_sample_phrases=new_samples,
+        message=(
+            f"Profile updated (v{updated_profile.version}). "
+            f"Accuracy: {accuracy:.0%}. "
+            + ("Looking good! " if accuracy >= 0.6 else "We'll keep refining. ")
+            + "Review the new phrases above."
+        ),
+    )
+
+
+@app.get(
+    "/personality/questions",
+    response_model=list[QuestionResponse],
+    tags=["personality"],
+)
+async def personality_questions():
+    """Get the personality questionnaire questions
+
+    Returns all questions with their IDs, text, help text,
+    and available choices.
+
+    Use these question IDs when submitting answers to
+    POST /personality/setup.
+    """
+    from personality.questionnaire import Questionnaire
+
+    q = Questionnaire()
+    questions = q.get_questions()
+
+    return [
+        QuestionResponse(
+            id=question.id,
+            text=question.text,
+            help_text=question.help_text,
+            category=question.category.value,
+            input_type=question.input_type,
+            choices=question.choices,
+            required=question.required,
+        )
+        for question in questions
+    ]
+
+
+@app.get(
+    "/personality/{voice_id}",
+    response_model=PersonalityProfileResponse,
+    tags=["personality"],
+    responses={404: {"model": ErrorResponse}},
+)
+async def get_personality_profile(voice_id: str):
+    """Get the personality profile for a voice
+
+    Returns all personality data including traits,
+    catchphrases, topics, and sample phrases.
+    """
+    personality_engine = get_personality()
+    manager = get_manager()
+
+    voice = manager.get_voice(voice_id)
+    if voice is None:
+        raise HTTPException(status_code=404, detail=f'Voice "{voice_id}" not found.')
+
+    profile = personality_engine.get_profile(voice.name)
+    if profile is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f'No personality configured for "{voice.name}".',
+        )
+
+    return PersonalityProfileResponse(
+        voice_name=profile.voice_name,
+        description=profile.description,
+        formality=profile.formality,
+        humor_style=profile.humor_style,
+        catchphrases=profile.catchphrases,
+        topics=profile.topics,
+        vocabulary_level=profile.vocabulary_level,
+        emoji_usage=profile.emoji_usage,
+        sentence_length=profile.sentence_length,
+        directness=profile.directness,
+        warmth=profile.warmth,
+        energy=profile.energy,
+        sample_phrases=profile.sample_phrases,
+        sources=profile.sources,
+        version=profile.version,
+    )
+
+
+@app.delete(
+    "/personality/{voice_id}",
+    tags=["personality"],
+    responses={404: {"model": ErrorResponse}},
+    status_code=204,
+)
+async def delete_personality(voice_id: str):
+    """Delete personality profile for a voice
+
+    ⚠️  This permanently deletes the personality profile,
+    all example texts, and vocabulary data.
+    The cloned voice itself is NOT deleted.
+    """
+    personality_engine = get_personality()
+    manager = get_manager()
+
+    voice = manager.get_voice(voice_id)
+    if voice is None:
+        raise HTTPException(status_code=404, detail=f'Voice "{voice_id}" not found.')
+
+    if not personality_engine.delete_personality(voice.name):
+        raise HTTPException(
+            status_code=404,
+            detail=f'No personality configured for "{voice.name}".',
+        )
+
+    voice.has_personality = False
+    return Response(status_code=204)
+
+
+@app.post(
+    "/personality/analyze",
+    response_model=TextAnalysisResponse,
+    tags=["personality"],
+    responses={404: {"model": ErrorResponse}},
+)
+async def analyze_texts(request: TextAnalysisRequest):
+    """Analyze texts to extract personality patterns
+
+    Upload text messages (WhatsApp, emails, etc.) and the
+    system will extract vocabulary, formality level, emoji usage,
+    sentence patterns, and potential catchphrases.
+
+    If the voice already has a personality profile, the
+    discovered patterns will be merged into it.
+    """
+    personality_engine = get_personality()
+    manager = get_manager()
+
+    voice = manager.get_voice(request.voice_id)
+    if voice is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f'Voice "{request.voice_id}" not found.',
+        )
+
+    analysis = personality_engine.import_texts(
+        voice.name, request.texts, source=request.source,
+    )
+
+    has_profile = personality_engine.has_personality(voice.name)
+
+    return TextAnalysisResponse(
+        voice_id=voice.voice_id,
+        total_messages=analysis.get("total_messages", 0),
+        total_words=analysis.get("total_words", 0),
+        avg_sentence_length=analysis.get("avg_sentence_length", 0),
+        inferred_formality=analysis.get("inferred_formality", "unknown"),
+        emoji_level=analysis.get("emoji_level", "unknown"),
+        top_words=analysis.get("top_words", {}),
+        potential_catchphrases=analysis.get("potential_catchphrases", []),
+        texts_saved=analysis.get("texts_saved", 0),
+        profile_enriched=has_profile,
     )
 
 
