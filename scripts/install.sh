@@ -328,11 +328,33 @@ pip install \
 # Voice engine
 if ! $SKIP_VOICE; then
     log "Instalando motor de voz (Chatterbox TTS)..."
+    warn "⚠️  Esto puede tardar varios minutos. Chatterbox incluye PyTorch (~2GB)."
+    warn "    Los modelos de voz (~2GB) se descargarán la primera vez que se use."
+    
+    # Detect GPU/MPS for optimal PyTorch
+    VOICE_DEVICE="cpu"
+    if [[ "$OS" == "Darwin" ]] && [[ "$ARCH" == "arm64" ]]; then
+        VOICE_DEVICE="mps"
+        log "Apple Silicon detectado → motor de voz usará ${BOLD}MPS (GPU)${NC}"
+    elif command_exists nvidia-smi; then
+        VOICE_DEVICE="cuda"
+        log "GPU NVIDIA detectada → motor de voz usará ${BOLD}CUDA${NC}"
+    else
+        log "Sin GPU dedicada → motor de voz usará ${BOLD}CPU${NC} (más lento pero funcional)"
+    fi
+    
     pip install \
-        chatterbox-tts 2>&1 | tail -3 || {
+        chatterbox-tts 2>&1 | tail -5 || {
         warn "Chatterbox no disponible. Instalando TTS alternativo (Coqui/XTTS)..."
         pip install TTS 2>&1 | tail -3 || warn "Motor de voz no instalado. Puedes instalarlo después."
     }
+    
+    # Verify Chatterbox installation
+    if "$PYTHON_CMD" -c "from chatterbox.tts import ChatterboxTTS; print('OK')" 2>/dev/null; then
+        log "✅ Chatterbox TTS instalado correctamente"
+    else
+        warn "⚠️  Chatterbox importa con errores. El motor puede necesitar ajustes."
+    fi
 fi
 
 # Ollama Python client
@@ -371,6 +393,7 @@ cat > "$INSTALL_DIR/config.json" <<EOF
     },
     "voice": {
         "engine": "chatterbox",
+        "device": "${VOICE_DEVICE:-cpu}",
         "fallback": "xtts"
     },
     "channels": {},
