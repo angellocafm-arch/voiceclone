@@ -205,6 +205,30 @@ src/landing/
 
 ---
 
+## Módulo 4: CANALES DE MENSAJERÍA (igual que OpenClaw)
+
+Igual que yo recibo mensajes por Telegram, WhatsApp, Discord y otros canales, VoiceClone hace lo mismo. El sistema instalado en el ordenador del usuario se conecta a sus canales:
+
+**Caso de uso principal:**
+- La persona solo ha perdido la voz pero puede escribir desde el móvil
+- Escribe en Telegram desde el móvil: "Dile a María que llegaré tarde"
+- El sistema en el ordenador de casa recibe el mensaje
+- Lo sintetiza con su voz clonada
+- El altavoz del ordenador habla en la habitación donde está
+
+**Otros casos:**
+- Familiar remoto escribe por WhatsApp → suena con la voz del paciente en casa
+- El paciente escribe en el móvil con eye tracking → la voz suena en el ordenador del salón
+- Bot de Telegram que cualquier contacto puede usar para "hablar" a través del paciente
+
+**Cómo se implementa:**
+- Reutilizar la arquitectura de plugins de canales de OpenClaw (MIT)
+- El sistema instalado actúa como gateway local (igual que openclaw gateway)
+- Soporta: Telegram, WhatsApp, Signal, iMessage — los mismos que OpenClaw
+- Configuración desde la interfaz web local (no hay que tocar código)
+
+---
+
 ## Lo que NO es VoiceClone
 
 - ❌ No es un servicio cloud (todo local)
