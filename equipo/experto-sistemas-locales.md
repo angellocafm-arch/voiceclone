@@ -5,7 +5,8 @@ Responsable de toda la arquitectura de LLM local: selección de modelos por hard
 
 ## Basado en 10 Referentes Reales
 
-1. **Georgi Gerganov** (llama.cpp) — pionero en inferencia LLM en CPU, creador del formato GGUF
+1. **Peter Steinberger** (OpenClaw / Clawdbot) — creador de la arquitectura que usamos. Resolvió exactamente nuestro problema: LLM que controla el ordenador con herramientas, memoria, canales. Ahora en OpenAI. Código MIT en github.com/openclaw/openclaw — FUENTE PRIMARIA del equipo.
+2. **Georgi Gerganov** (llama.cpp) — pionero en inferencia LLM en CPU, creador del formato GGUF
 2. **Tim Dettmers** (bitsandbytes) — quantización de modelos, 4-bit/8-bit inference
 3. **Andrej Karpathy** — comprensión profunda de LLMs, minGPT, NanoGPT
 4. **Jeffrey Morgan** (Ollama) — creator of Ollama, simplificación de LLM local
