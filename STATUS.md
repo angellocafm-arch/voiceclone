@@ -188,6 +188,21 @@ DATOS (~/.voiceclone/ — todo local)
 
 ---
 
+## Infraestructura necesaria para el botón de descarga
+
+| Pieza | Plataforma | Coste | Estado |
+|-------|-----------|-------|--------|
+| Código fuente | GitHub | Gratis | ✅ Listo |
+| Web con botón de descarga | Vercel | Gratis | ⚠️ Pendiente deploy |
+| Installers (.pkg, .sh, .exe) | GitHub Releases | Gratis | ⚠️ Pendiente crear release |
+| Motor de voz (Chatterbox) | Hugging Face | Gratis | ⚠️ Pendiente añadir al installer |
+| LLM (Mistral, Llama) | Ollama servers | Gratis | ✅ Ya en installer |
+| Base de datos | — | — | No necesaria (archivos locales) |
+
+**Conclusión:** GitHub + Vercel + GitHub Releases es todo lo que necesitamos. Sin Supabase, sin servidor propio, sin costes.
+
+---
+
 ## Próxima sesión de trabajo — por dónde empezar
 
 **Tarea inmediata más importante:**
