@@ -1,13 +1,5 @@
-"""VoiceClone API — Local FastAPI server
+"""FastAPI application for VoiceClone"""
 
-Endpoints:
-  POST /clone          Clone voice from audio
-  POST /speak          Synthesize text with cloned voice
-  GET  /voices         List cloned voices
-  GET  /voices/{id}    Get voice details
-  DELETE /voices/{id}  Delete a voice
-  GET  /health         Server health/status
+from .app import create_app
 
-All endpoints are local-only (localhost:8765).
-No authentication needed — it's your computer.
-"""
+__all__ = ["create_app"]
