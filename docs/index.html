@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceClone — Tu voz, siempre contigo</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a2e;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b5;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --success: #34d399;
+            --warning: #fbbf24;
+            --border: #2a2a3e;
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ─── Hero Section ─── */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 60px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-icon {
+            font-size: 72px;
+            margin-bottom: 24px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .hero-emphasis {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* ─── Hardware Detection Card ─── */
+        .detection-card {
+            max-width: 560px;
+            margin: 40px auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            text-align: left;
+        }
+
+        .detection-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .detection-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .detection-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hardware-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .hw-item {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .hw-item .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .hw-item .value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .model-recommendation {
+            background: linear-gradient(135deg, var(--accent-glow), transparent);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .model-recommendation h3 {
+            font-size: 16px;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .model-recommendation .model-name {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .model-recommendation .model-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .model-recommendation .model-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .model-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ─── Download Button ─── */
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            background: var(--accent);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .download-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        .download-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .download-sub {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* ─── Manual Selection ─── */
+        .manual-select {
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .manual-select button {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+
+        .manual-panel {
+            display: none;
+            margin-top: 16px;
+        }
+
+        .manual-panel.visible {
+            display: block;
+        }
+
+        .manual-panel select {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        /* ─── Features Section ─── */
+        .features {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 0 24px;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 40px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+        }
+
+        .feature-card .icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .feature-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ─── Footer ─── */
+        .footer {
+            text-align: center;
+            padding: 40px 24px 60px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* ─── Privacy Badge ─── */
+        .privacy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--success);
+            border-radius: 24px;
+            padding: 8px 16px;
+            margin: 24px auto 0;
+            font-size: 14px;
+            color: var(--success);
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 32px; }
+            .hero p { font-size: 16px; }
+            .hardware-grid { grid-template-columns: 1fr; }
+            .feature-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-icon">🎤</div>
+        <h1>Tu voz, siempre contigo</h1>
+        <p>
+            Un asistente de vida completo para personas con <span class="hero-emphasis">ELA</span>
+            y dificultades motoras. Habla con tu propia voz clonada, controla tu ordenador con la mirada
+            y comunícate con tus seres queridos.
+        </p>
+        <div class="privacy-badge">
+            🔒 100% local — sin internet, sin nube, sin suscripción
+        </div>
+    </section>
+
+    <!-- Hardware Detection -->
+    <section>
+        <div class="detection-card" id="detectionCard">
+            <div class="detection-header">
+                <div class="detection-spinner" id="spinner"></div>
+                <h2 id="detectionTitle">Analizando tu ordenador...</h2>
+            </div>
+
+            <div class="hardware-grid" id="hardwareGrid" style="display:none;">
+                <div class="hw-item">
+                    <div class="label">Memoria RAM</div>
+                    <div class="value" id="hwRam">—</div>
+                </div>
+                <div class="hw-item">
+                    <div class="label">Procesador</div>
+                    <div class="value" id="hwCpu">—</div>
+                </div>
+                <div class="hw-item">
+                    <div class="label">Gráfica</div>
+                    <div class="value" id="hwGpu">—</div>
+                </div>
+                <div class="hw-item">
+                    <div class="label">Sistema</div>
+                    <div class="value" id="hwOs">—</div>
+                </div>
+            </div>
+
+            <div class="model-recommendation" id="modelRec" style="display:none;">
+                <h3>✨ Modelo recomendado para tu ordenador</h3>
+                <div class="model-name" id="modelName">—</div>
+                <div class="model-desc" id="modelDesc">—</div>
+                <div class="model-meta">
+                    <span>💾 <span id="modelSize">—</span> GB descarga</span>
+                    <span>🧠 Requiere <span id="modelRam">—</span> GB RAM</span>
+                </div>
+            </div>
+
+            <a href="#" class="download-btn" id="downloadBtn" style="display:none;">
+                Descargar VoiceClone
+            </a>
+            <div class="download-sub" id="downloadSub" style="display:none;">
+                Descarga gratuita · Código abierto (MIT) · Instalación en 1 clic
+            </div>
+
+            <div class="manual-select">
+                <button onclick="toggleManual()" id="manualToggle" style="display:none;">
+                    ¿Quieres elegir otro modelo?
+                </button>
+                <div class="manual-panel" id="manualPanel">
+                    <select id="manualModel" onchange="onManualSelect()">
+                        <option value="">Selecciona manualmente...</option>
+                        <option value="0">Llama 3.2 3B — 2 GB (ordenadores básicos)</option>
+                        <option value="1">Mistral 7B — 4 GB (equilibrado)</option>
+                        <option value="2">Llama 3.1 8B — 6 GB (recomendado)</option>
+                        <option value="3">Llama 3.3 13B — 10 GB (avanzado)</option>
+                        <option value="4">Llama 3.1 70B — 40 GB (máxima calidad)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+        <h2>Los 4 módulos de VoiceClone</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">💬</div>
+                <h3>Comunicación</h3>
+                <p>
+                    Tablero de frases seleccionables con la mirada. Campo de texto libre.
+                    Todo lo que escribas o selecciones suena con tu propia voz clonada.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🖥️</div>
+                <h3>Control del Ordenador</h3>
+                <p>
+                    Controla tu ordenador con instrucciones naturales.
+                    "Crea una carpeta", "Abre el navegador", "Lee este PDF".
+                    La IA entiende y ejecuta.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📝</div>
+                <h3>Productividad</h3>
+                <p>
+                    Dicta documentos, gestiona tu agenda, configura recordatorios.
+                    Arrastra un PDF y el sistema lo lee en tu voz.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📱</div>
+                <h3>Mensajería</h3>
+                <p>
+                    Recibe mensajes de Telegram y WhatsApp que suenan con tu voz.
+                    Tus seres queridos te escriben, tu voz lee sus mensajes en tu habitación.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>
+            VoiceClone es software libre · Licencia MIT ·
+            <a href="https://github.com/angellocafm-arch/voiceclone" target="_blank">GitHub</a>
+        </p>
+        <p style="margin-top: 8px;">
+            Hecho con ❤️ por Vertex Developer · 2026
+        </p>
+    </footer>
+
+    <!-- Hardware Detection Script -->
+    <script src="hardware.js"></script>
+    <script>
+        const OS_LABELS = {
+            'macos-arm64': 'macOS (Apple Silicon)',
+            'macos-x64': 'macOS (Intel)',
+            'linux-x64': 'Linux',
+            'windows-x64': 'Windows',
+            'unknown': 'Desconocido'
+        };
+
+        function formatGPU(renderer) {
+            if (!renderer) return 'No detectada';
+            // Shorten long GPU names
+            return renderer
+                .replace('ANGLE (', '')
+                .replace(')', '')
+                .replace('Apple ', '')
+                .replace('NVIDIA ', '')
+                .replace('GeForce ', '')
+                .split(',')[0]
+                .trim();
+        }
+
+        function updateUI(hardware, recommendation) {
+            // Hide spinner, show results
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('detectionTitle').textContent = 'Tu ordenador';
+            document.getElementById('hardwareGrid').style.display = 'grid';
+            document.getElementById('modelRec').style.display = 'block';
+            document.getElementById('downloadBtn').style.display = 'block';
+            document.getElementById('downloadSub').style.display = 'block';
+            document.getElementById('manualToggle').style.display = 'inline';
+
+            // Hardware info
+            document.getElementById('hwRam').textContent =
+                hardware.ramGB ? `${hardware.ramGB} GB` : 'No detectada';
+            document.getElementById('hwCpu').textContent =
+                hardware.cpuCores ? `${hardware.cpuCores} núcleos` : 'No detectado';
+            document.getElementById('hwGpu').textContent = formatGPU(hardware.gpuRenderer);
+            document.getElementById('hwOs').textContent = OS_LABELS[hardware.os] || hardware.os;
+
+            // Model recommendation
+            document.getElementById('modelName').textContent = recommendation.displayName;
+            document.getElementById('modelDesc').textContent = recommendation.description;
+            document.getElementById('modelSize').textContent = recommendation.sizeGB;
+            document.getElementById('modelRam').textContent = recommendation.ramRequired;
+
+            // Download button
+            const download = getInstallerDownload(hardware.os);
+            const btn = document.getElementById('downloadBtn');
+            btn.textContent = download.label;
+            btn.href = download.url;
+        }
+
+        function toggleManual() {
+            const panel = document.getElementById('manualPanel');
+            panel.classList.toggle('visible');
+        }
+
+        function onManualSelect() {
+            const idx = parseInt(document.getElementById('manualModel').value);
+            if (isNaN(idx)) return;
+
+            const model = MODEL_CATALOG[idx];
+            document.getElementById('modelName').textContent = model.displayName;
+            document.getElementById('modelDesc').textContent = model.description;
+            document.getElementById('modelSize').textContent = model.sizeGB;
+            document.getElementById('modelRam').textContent = model.ramRequired;
+        }
+
+        // Run detection after a brief delay (UX: shows spinner briefly)
+        setTimeout(() => {
+            try {
+                const { hardware, recommendation } = detectAndRecommend();
+                updateUI(hardware, recommendation);
+            } catch (e) {
+                console.error('Hardware detection error:', e);
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('detectionTitle').textContent =
+                    'No pudimos detectar tu hardware automáticamente';
+                document.getElementById('manualToggle').style.display = 'inline';
+                document.getElementById('downloadBtn').style.display = 'block';
+                document.getElementById('downloadBtn').textContent = 'Descargar VoiceClone';
+                document.getElementById('downloadBtn').href =
+                    'https://github.com/angellocafm-arch/voiceclone/releases';
+            }
+        }, 1200);
+    </script>
+
+</body>
+</html>
