@@ -44,7 +44,7 @@ class VoiceCloneAPI {
     return response.arrayBuffer();
   }
 
-  async listVoices(): Promise<Array<{ id: string; name: string }>> {
+  async listVoices(): Promise<Array<{ id: string; name: string; has_personality?: boolean }>> {
     const response = await fetch(`${API_BASE}/voices`, {
       method: "GET",
     });

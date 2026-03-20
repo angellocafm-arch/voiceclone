@@ -51,6 +51,10 @@ build/
 npm-debug.log
 yarn-error.log
 
+# Next.js
+.next/
+out/
+
 # OS
 .DS_Store
 Thumbs.db

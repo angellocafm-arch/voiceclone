@@ -57,7 +57,7 @@ export default function Home() {
               ...prev,
               voiceId: voice.id,
               voiceName: voice.name,
-              hasPersonality: voice.has_personality,
+              hasPersonality: voice.has_personality ?? false,
               // Don't auto-redirect — let user choose from landing
             }));
           }
@@ -112,7 +112,7 @@ export default function Home() {
         return (
           <CloneScreen
             apiAvailable={state.apiAvailable}
-            onComplete={(voiceId, voiceName) => {
+            onComplete={(voiceId: string, voiceName: string) => {
               setVoice(voiceId, voiceName);
               navigate("personality");
             }}
