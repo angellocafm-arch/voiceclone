@@ -1,10 +1,32 @@
 # 🎤 VoiceClone — Tu voz, para siempre
 
+![Version](https://img.shields.io/badge/version-0.3.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)
+
 **Un asistente de vida completo para personas con ELA y dificultades motoras.**
 
 VoiceClone clona tu voz con solo 5 segundos de audio y la convierte en tu herramienta para seguir comunicándote, controlando tu ordenador, leyendo documentos y enviando mensajes — todo con tu propia voz.
 
 100% gratis. 100% privado. 100% local. Sin internet, sin nube, sin suscripción.
+
+---
+
+## ⚡ Instalación rápida (3 comandos)
+
+**macOS / Linux:**
+```bash
+curl -fsSL https://github.com/angellocafm-arch/voiceclone/releases/latest/download/install.sh | bash
+```
+
+**Windows (PowerShell como Administrador):**
+```powershell
+irm https://github.com/angellocafm-arch/voiceclone/releases/latest/download/install_windows.ps1 | iex
+```
+
+**¿Qué necesito?** Un ordenador con 4GB+ de RAM y 5GB de espacio libre. Nada más.
+
+**¿Qué se instala?** Python, un modelo de IA local (Ollama), y el motor de voz Chatterbox TTS. Todo se queda en tu ordenador. Nada va a la nube.
 
 ---
 
